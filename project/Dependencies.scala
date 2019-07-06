@@ -92,6 +92,10 @@ object Dependencies {
   lazy val config = Seq(
     "com.github.pureconfig" %% "pureconfig" % Version.pureconfig
   )
+  
+  lazy val nameof = Seq(
+    "com.github.dwickern" %% "scala-nameof" % "1.0.3" % "provided"
+  )
 
 }
 

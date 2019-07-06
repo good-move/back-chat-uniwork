@@ -1,18 +1,37 @@
 package ru.nsu.fit.supernova.chat
 
-import scala.util.Try
+import scala.concurrent.Future
+import scala.util.{Failure, Success}
 
 import akka.actor.ActorSystem
-import io.circe.Json
-import cats.instances.try_._
-import ru.nsu.fit.utils.logging.{MonadLogger, PrettyLogger}
+import pureconfig._
+import reactivemongo.api.collections.bson.BSONCollection
+import ru.nsu.fit.supernova.chat.config.Config
+import ru.nsu.fit.supernova.chat.dao.{ChatRoomDao, ChatRoomDaoImpl}
+import ru.nsu.fit.supernova.chat.model.{ChatRoom, ChatStatus}
 
 object Main extends App {
+  import pureconfig.generic.auto._
 
   implicit val system = ActorSystem("supernova_actor_system")
+  implicit val ctx    = system.dispatcher
 
-  val logger: MonadLogger[Try] = PrettyLogger[Try](name = "supernova_logger")
+  val config = loadConfigOrThrow[Config]("ru.nsu.fit.supernova")
 
-  logger.info("application started")
-  logger.info("testing", Map("entity" -> Json.obj("f" -> Json.fromString("v"))))
+  val chatRoom = ChatRoom("123", ChatStatus.Active, Set.empty, List.empty)
+
+  val future = for {
+    mongo <- dao.dbFuture(config.db.mongo.uri)
+    dao: ChatRoomDao[Future] = new ChatRoomDaoImpl(mongo[BSONCollection](config.db.mongo.collections.chat))
+    _  <- dao.insert(chatRoom)
+    cr <- dao.find(chatRoom.id)
+    _ = println(cr)
+  } yield ()
+
+
+  future.andThen {
+    case Success(value) => println(value)
+    case Failure(value) => println(value)
+  }
+
 }
