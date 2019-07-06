@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<configuration>
+
+    <appender name="json" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${CUSTOM_LOG_DIR}/log.json</file>
+        <append>false</append>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <fileNamePattern>${DS_LOG_DIR}/log.%i.json.gz</fileNamePattern>
+            <minIndex>0</minIndex>
+            <maxIndex>10</maxIndex>
+        </rollingPolicy>
+
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>100MB</maxFileSize>
+        </triggeringPolicy>
+
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp>
+                    <timeZone>UTC</timeZone>
+                </timestamp>
+                <loggerName/>
+                <logLevel/>
+                <message/>
+                <arguments/>
+                <mdc/>
+                <threadName/>
+                <stackTrace>
+                    <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                        <maxDepthPerThrowable>20</maxDepthPerThrowable>
+                        <maxLength>2048</maxLength>
+                        <exclude>akka\.http\.scaladsl\.server\.RouteConcatenation.*</exclude>
+                        <rootCauseFirst>true</rootCauseFirst>
+                    </throwableConverter>
+                </stackTrace>
+            </providers>
+        </encoder>
+    </appender>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <jsonGeneratorDecorator class="net.logstash.logback.decorate.PrettyPrintingJsonGeneratorDecorator"/>
+            <providers>
+                <timestamp>
+                    <timeZone>UTC</timeZone>
+                </timestamp>
+                <loggerName/>
+                <logLevel/>
+                <message/>
+                <arguments/>
+                <mdc/>
+                <threadName/>
+                <stackTrace>
+                    <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                        <maxDepthPerThrowable>20</maxDepthPerThrowable>
+                        <maxLength>2048</maxLength>
+                        <rootCauseFirst>true</rootCauseFirst>
+                    </throwableConverter>
+                </stackTrace>
+            </providers>
+        </encoder>
+    </appender>
+
+    <logger name="ru.nsu.fit" level="debug" additivity="false">
+        <appender-ref ref="json"/>
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+    <logger name="akka" level="info" additivity="false">
+        <appender-ref ref="json"/>
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+    <logger name="reactivemongo" level="error" additivity="false">
+        <appender-ref ref="json"/>
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+    <logger name="reactivemongo-akka" level="error" additivity="false">
+        <appender-ref ref="json"/>
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+    <logger name="io.netty" level="OFF" additivity="false"/>
+    <logger name="com.github.mauricio.async.db.postgresql" level="OFF" additivity="false"/>
+
+    <root level="debug">
+        <appender-ref ref="json"/>
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+</configuration>
