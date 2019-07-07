@@ -73,12 +73,12 @@
         <appender-ref ref="STDOUT"/>
     </logger>
 
-    <logger name="reactivemongo" level="error" additivity="false">
+    <logger name="reactivemongo" level="info" additivity="false">
         <appender-ref ref="json"/>
         <appender-ref ref="STDOUT"/>
     </logger>
 
-    <logger name="reactivemongo-akka" level="error" additivity="false">
+    <logger name="reactivemongo-akka" level="info" additivity="false">
         <appender-ref ref="json"/>
         <appender-ref ref="STDOUT"/>
     </logger>

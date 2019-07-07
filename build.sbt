@@ -13,11 +13,13 @@ lazy val digitalhack =
     .settings(
       libraryDependencies ++= Seq(
         Dependencies.akka,
+        Dependencies.config,
         Dependencies.postgres,
         Dependencies.mongo,
         Dependencies.sttp,
         Dependencies.cats,
         Dependencies.monocle,
+        Dependencies.nameof,
         Dependencies.tcbTypedSchema,
         Dependencies.logging,
         Dependencies.json,

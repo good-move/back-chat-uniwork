@@ -19,6 +19,7 @@ object Dependencies {
   val akka = Seq(
     "com.typesafe.akka" %% "akka-http" % Version.akkaHttp,
     "com.typesafe.akka" %% "akka-actor" % Version.akka,
+    "com.typesafe.akka" %% "akka-actor-typed" % Version.akka,
     "com.typesafe.akka" %% "akka-stream" % Version.akka,
     "com.typesafe.akka" %% "akka-remote" % Version.akka,
     "com.typesafe.akka" %% "akka-slf4j" % Version.akka,
@@ -91,6 +92,10 @@ object Dependencies {
 
   lazy val config = Seq(
     "com.github.pureconfig" %% "pureconfig" % Version.pureconfig
+  )
+
+  lazy val nameof = Seq(
+    "com.github.dwickern" %% "scala-nameof" % "1.0.3" % "provided"
   )
 
 }
