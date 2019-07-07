@@ -23,7 +23,7 @@ class ChatRoomDaoImpl(collection: BSONCollection)(implicit ec: ExecutionContext)
   override def update(chatRoom: ChatRoom): Future[ChatRoom] = {
     val patched = chatRoom.copy(nonce = chatRoom.nonce + 1)
     collection
-      .findAndUpdate(BSONDocument(Keys.id -> chatRoom.id, Keys.nonce -> chatRoom.nonce), patched)
+      .findAndUpdate(BSONDocument(Keys.id -> chatRoom.id, Keys.nonce -> chatRoom.nonce), patched, fetchNewObject = true)
       .map(_.result[ChatRoom].get)
   }
 
