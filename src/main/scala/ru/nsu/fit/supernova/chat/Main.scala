@@ -1,6 +1,6 @@
 package ru.nsu.fit.supernova.chat
 
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future}
 import scala.util.{Failure, Success}
 
 import akka.actor.ActorSystem

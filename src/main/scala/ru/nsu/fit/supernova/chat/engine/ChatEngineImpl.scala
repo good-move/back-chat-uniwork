@@ -21,25 +21,20 @@ class ChatEngineImpl[F[_]: Concurrent](dao: ChatRoomDao[Future])(
     ME: MonadError[F, Throwable],
     ML: MonadLogger[F],
     nt: Future ~> F,
+    nt1: F ~> Future,
     s: Scheduler,
     system: ActorSystem
 ) extends ChatEngine[F] {
 
   private val ref = Ref.unsafe[F, Map[ChatId, EngineChatRoom[F]]](Map.empty)
+  nt1(recoverChats())
 
   def find(id: ChatId): F[Option[EngineChatRoom[F]]] =
     ref.get.map(_.get(id))
 
   override def create(participants: Seq[UserId]): F[ChatRoom] = {
     val roomId = UUID.randomUUID().toString
-    val room   = RoomWrapper(system.actorOf(Props(new EngineChatRoomActor[F](roomId, participants.toSet, dao))))
-    for {
-      _ <- ref.modify { map =>
-        (map + (roomId -> room), ())
-      }
-      chatRoom <- room.chatRoom
-      _        <- ML.info(s"Initialized chat room ${chatRoom.id}")
-    } yield chatRoom
+    launchChatRoom(roomId, participants.toSet)
   }
 
   override def delete(chatId: ChatId): F[Unit] =
@@ -55,11 +50,36 @@ class ChatEngineImpl[F[_]: Concurrent](dao: ChatRoomDao[Future])(
   override def connect(chatId: ChatId, userId: UserId): F[StreamConnectionHandler] =
     for {
       maybeRoom <- ref.get
-      _ = println(maybeRoom)
       handler <- maybeRoom
         .get(chatId)
         .fold(ME.raiseError[StreamConnectionHandler](ChatNotFound(chatId)))(_.connect(userId))
     } yield handler
+
+  private def launchChatRoom(id: String, participants: Set[UserId]): F[ChatRoom] = {
+    val room = RoomWrapper(system.actorOf(Props(new EngineChatRoomActor[F](id, participants, dao))))
+    for {
+      _ <- ref.modify { map =>
+        (map + (id -> room), ())
+      }
+      chatRoom <- room.chatRoom
+      _        <- ML.info(s"Initialized chat room ${chatRoom.id}")
+    } yield chatRoom
+  }
+
+  private def recoverChats(): F[Unit] =
+    for {
+      _           <- ML.info("recovering chat rooms")
+      activeChats <- nt(dao.active())
+      _ <- activeChats.foldLeft(ME.unit)(
+        (acc, room) =>
+          for {
+            _ <- acc
+            _ <- ML.info("recovering chat", Map("chatId" -> room.id))
+            _ <- launchChatRoom(room.id, room.participants)
+          } yield ()
+      )
+
+    } yield ()
 
 }
 

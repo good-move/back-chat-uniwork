@@ -29,7 +29,7 @@ class ChatRoomDaoImpl(collection: BSONCollection)(implicit ec: ExecutionContext)
 
   override def active(): Future[Seq[ChatRoom]] =
     collection
-      .find(BSONDocument(Keys.status -> ChatStatus.Active.toString), Option.empty)
+      .find(BSONDocument(Keys.status -> "active"), Option.empty)
       .cursor[ChatRoom]()
       .collect[Seq](maxDocs = -1, Cursor.ContOnError())
 
