@@ -135,6 +135,7 @@ object EngineChatRoomActor {
       case PostMessage(message) =>
         wsActor.foreach(_ ! WsTextMessage.Strict(message.asJson.pretty(jsonPrinter)))
 
+      case RoomClosed => wsActor.foreach(_ ! PoisonPill)
       case e =>
         println("OTHER MESSAGE", e)
     }
